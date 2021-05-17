@@ -163,8 +163,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="mdbook"><a class="header" href="#mdbook">mdBook</a></h1>
-<p>I've started using <a href="https://github.com/rust-lang/mdBook">mdBook</a> as a way to get better at writing and force myself to have a better understanding of what I'm working on. I'm hoping that by writing everything down, I'll force myself to get a better understanding of the topic and give my future self resources to use when revisiting the topic.</p>
+                        <h1 id="about-this-book"><a class="header" href="#about-this-book">About this Book</a></h1>
+<p>I've started using <a href="https://github.com/rust-lang/mdBook">mdBook</a> as a way to get better at writing and force myself to have a better understanding of what I'm working on. Hopefully this will help my future self when I need a reference, or potentially someone else.</p>
 <p>In terms of mdBook itself, the best resource I've found is the guide book built with mdBook itself found at https://rust-lang.github.io/mdBook.</p>
 <h2 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h2>
 <p>Create a book with</p>
@@ -182,6 +182,36 @@ mdbook init
 [Non-numered top-level section](path.md)
 </code></pre>
 <p>The contents files support normal markdown.</p>
+<h2 id="deploy-to-github-pages"><a class="header" href="#deploy-to-github-pages">Deploy to GitHub Pages</a></h2>
+<p>Add a <code>.github/workflows/gh-pages.yml</code> file with the contents:</p>
+<pre><code class="language-yaml">name: github pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+        with:
+          mdbook-version: 'latest'
+
+      - run: mdbook build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./book
+</code></pre>
+<p>Go to <code>https://github.com/{username}/{repo}/settings/pages</code> and ensure the source branch is <code>gh-pages</code>.</p>
+<p>I had to wait some time for it to deploy.</p>
 
                     </main>
 
