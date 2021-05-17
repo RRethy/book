@@ -1,4 +1,4 @@
 # Summary
 
 - [About this book](./mdbook.md)
-- [A few lines of shell script to replace/improve autojump/z.lua](./jd.md)
+- [A small ZSH script to replace autojump](./jd.md)
