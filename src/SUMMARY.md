@@ -1,8 +1,4 @@
 # Summary
 
-- [Neovim](./neovim.md)
-
-- [Rust](./rust.md)
-    - [mdBook](./mdbook.md)
-
-- [Words](./words.md)
+- [About this book](./mdbook.md)
+- [A few lines of shell script to replace/improve autojump/z.lua](./jd.md)
