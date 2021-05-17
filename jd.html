@@ -164,6 +164,41 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="a-few-lines-of-shell-script-to-replaceimprove-autojumpzlua"><a class="header" href="#a-few-lines-of-shell-script-to-replaceimprove-autojumpzlua">A few lines of shell script to replace/improve autojump/z.lua</a></h1>
+<p>TODO</p>
+<pre><code class="language-zsh">mkdir -p &quot;$XDG_DATA_HOME/zshrc&quot;
+JD_DATA_DIR=&quot;$XDG_DATA_HOME/zshrc/chpwd.txt&quot;
+touch $JD_DATA_DIR
+local tmp=$(mktemp)
+cat $JD_DATA_DIR | while read dir ; do [[ -d $dir ]] &amp;&amp; echo $dir ; done &gt; $tmp
+cat $tmp &gt; $JD_DATA_DIR
+chpwd_functions+=(on_chpwd)
+function on_chpwd {
+    local tmp=$(mktemp)
+    { echo $PWD ; cat $JD_DATA_DIR } | sort | uniq 1&gt; $tmp
+    cat $tmp &gt; $JD_DATA_DIR
+}
+function fzy_jd {
+    if [[ ! -z $BUFFER ]]; then
+        BUFFER=$BUFFER&quot;jd &quot;
+        zle end-of-line
+        return 0
+    fi
+    local dir=$({ echo $HOME ; cat $JD_DATA_DIR } | fzy)
+    if [[ -z $dir ]]; then
+        zle redisplay
+        return 0
+    fi
+    zle push-line
+    BUFFER=&quot;cd $dir&quot;
+    zle accept-line
+    local ret=$?
+    zle reset-prompt
+    return $ret
+}
+zle -N fzy_jd
+bindkey 'jd ' fzy_jd
+alias jd=cd
+</code></pre>
 
                     </main>
 
