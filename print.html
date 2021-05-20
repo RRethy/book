@@ -217,7 +217,9 @@ jobs:
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="a-small-zsh-script-to-replace-autojump"><a class="header" href="#a-small-zsh-script-to-replace-autojump">A small ZSH script to replace autojump</a></h1>
 <p>Add this to a <code>~/.zshrc</code> and ensure you have <a href="https://github.com/jhawthorn/fzy">fzy</a> installed.</p>
 <p>When you type <code>jd </code> (<code>jd</code> followed by a space without pressing enter), fzy will pop open and let you change your <code>$PWD</code> to a previously visited directory. For details, just read the comments in the code snippet.</p>
-<pre><code class="language-zsh"># Setup some data a data file to store visited directories
+<p><strong>Note</strong>: To change the keybinding, modify the <code>$JUMPDIR_KEYBIND</code> variable.</p>
+<pre><code class="language-zsh">JUMPDIR_KEYBIND='jd '
+# Setup some data a data file to store visited directories
 mkdir -p &quot;$XDG_DATA_HOME/zshrc&quot;
 JD_DATA_DIR=&quot;$XDG_DATA_HOME/zshrc/chpwd.txt&quot;
 touch $JD_DATA_DIR
@@ -238,7 +240,7 @@ function fzy_jd {
     # If so, we manually input the `jd `
     if [[ ! -z $BUFFER ]]; then
         # Append `jd ` to the prompt
-        BUFFER=$BUFFER&quot;jd &quot;
+        BUFFER=$BUFFER$JUMPDIR_KEYBIND
         # move the cursor to the end of the line
         zle end-of-line
         return 0
@@ -262,10 +264,10 @@ function fzy_jd {
 # define the new widget function
 zle -N fzy_jd
 # bind the widget function to `jd `
-bindkey 'jd ' fzy_jd
+bindkey $JUMPDIR_KEYBIND fzy_jd
 # a nicety so that executing just jd will mimic the behaviour of just executing
 # cd, that is, change the pwd to $HOME
-alias jd=cd
+eval &quot;alias $(echo $JUMPDIR_KEYBIND|xargs)=cd&quot;
 </code></pre>
 
                     </main>
