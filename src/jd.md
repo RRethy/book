@@ -4,7 +4,10 @@ Add this to a `~/.zshrc` and ensure you have [fzy](https://github.com/jhawthorn/
 
 When you type `jd ` (`jd` followed by a space without pressing enter), fzy will pop open and let you change your `$PWD` to a previously visited directory. For details, just read the comments in the code snippet.
 
+**Note**: To change the keybinding, modify the `$JUMPDIR_KEYBIND` variable.
+
 ```zsh
+JUMPDIR_KEYBIND='jd '
 # Setup some data a data file to store visited directories
 mkdir -p "$XDG_DATA_HOME/zshrc"
 JD_DATA_DIR="$XDG_DATA_HOME/zshrc/chpwd.txt"
@@ -26,7 +29,7 @@ function fzy_jd {
     # If so, we manually input the `jd `
     if [[ ! -z $BUFFER ]]; then
         # Append `jd ` to the prompt
-        BUFFER=$BUFFER"jd "
+        BUFFER=$BUFFER$JUMPDIR_KEYBIND
         # move the cursor to the end of the line
         zle end-of-line
         return 0
@@ -50,8 +53,8 @@ function fzy_jd {
 # define the new widget function
 zle -N fzy_jd
 # bind the widget function to `jd `
-bindkey 'jd ' fzy_jd
+bindkey $JUMPDIR_KEYBIND fzy_jd
 # a nicety so that executing just jd will mimic the behaviour of just executing
 # cd, that is, change the pwd to $HOME
-alias jd=cd
+eval "alias $(echo $JUMPDIR_KEYBIND|xargs)=cd"
 ```
