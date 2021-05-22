@@ -1,6 +1,6 @@
 # Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent
 
-Whether it's to give it a new coat of paint or to make it easier on the eyes for 3am programming, I change my editor colours all the time. In editors likes Visual Studio Code or Atom, this is a simple matter of choosing one from a fuzzy matched drop-down menu. However, in Neovim we have to edit the `init.lua` so it sets a different colorscheme then restart the editor (or manually choose the same colorscheme with `:colorscheme <name>`). On top of this, we then need to update our terminal's colours to match (or at least I do). Let's see how close we can get to the VSCode experience.
+Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the `init.lua` and restart the editor (or source the `init.lua`). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This ir tedious and nowhere near as clean as VSCode, let's see how close we can get.
 
 **Note**: We will be using [base16](https://github.com/chriskempson/base16) colours, but this works equally well without them.
 
@@ -28,17 +28,19 @@ local base16_theme_fname = vim.fn.expand('~/.config/.base16_theme')
 vim.cmd('colorscheme '..vim.fn.readfile(base16_theme_fname)[1])
 ```
 
-3. Create a function to update the colours for our current terminal window.
+3. Create a function to update the colours for our current terminal window and current instance of Neovim.
 
 ```lua
-function set_kitty_colors(name)
+local function set_colorscheme(name)
+    vim.fn.writefile({name}, base16_theme_fname)
+    vim.cmd('colorscheme '..name)
     vim.loop.spawn('kitty', {
         args = {
             '@',
             '--to',
             vim.env.KITTY_LISTEN_ON,
             'set-colors',
-            '-c'
+            '-c',
             string.format('~/.config/kitty/base16-kitty/colors/%s.conf', name)
         }
     }, nil)
@@ -55,16 +57,12 @@ nvim.nnoremap('<leader>c', function()
         prompt_title = 'Change Colorscheme',
         attach_mappings = function(bufnr)
             telescope_actions.select_default:replace(function()
-                local name = action_state.get_selected_entry().value
-                vim.fn.writefile({name}, base16_theme_fname)
-                set_colorscheme(name)
+                set_colorscheme(action_state.get_selected_entry().value)
                 telescope_actions.close(bufnr)
             end)
             telescope_action_set.shift_selection:enhance({
                 post = function()
-                    local name = action_state.get_selected_entry().value
-                    vim.fn.writefile({name}, base16_theme_fname)
-                    set_colorscheme(name)
+                    set_colorscheme(action_state.get_selected_entry().value)
                 end
             })
         return true
