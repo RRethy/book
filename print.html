@@ -294,16 +294,18 @@ eval &quot;alias $(echo $JUMPDIR_KEYBIND|xargs)=cd&quot;
 vim.cmd('colorscheme '..vim.fn.readfile(base16_theme_fname)[1])
 </code></pre>
 <ol start="3">
-<li>Create a function to update the colours for our current terminal window.</li>
+<li>Create a function to update the colours for our current terminal window and current instance of Neovim.</li>
 </ol>
-<pre><code class="language-lua">function set_kitty_colors(name)
+<pre><code class="language-lua">local function set_colorscheme(name)
+    vim.fn.writefile({name}, base16_theme_fname)
+    vim.cmd('colorscheme '..name)
     vim.loop.spawn('kitty', {
         args = {
             '@',
             '--to',
             vim.env.KITTY_LISTEN_ON,
             'set-colors',
-            '-c'
+            '-c',
             string.format('~/.config/kitty/base16-kitty/colors/%s.conf', name)
         }
     }, nil)
@@ -322,16 +324,12 @@ end
         prompt_title = 'Change Colorscheme',
         attach_mappings = function(bufnr)
             telescope_actions.select_default:replace(function()
-                local name = action_state.get_selected_entry().value
-                vim.fn.writefile({name}, base16_theme_fname)
-                set_colorscheme(name)
+                set_colorscheme(action_state.get_selected_entry().value)
                 telescope_actions.close(bufnr)
             end)
             telescope_action_set.shift_selection:enhance({
                 post = function()
-                    local name = action_state.get_selected_entry().value
-                    vim.fn.writefile({name}, base16_theme_fname)
-                    set_colorscheme(name)
+                    set_colorscheme(action_state.get_selected_entry().value)
                 end
             })
         return true
