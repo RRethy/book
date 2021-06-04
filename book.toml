@@ -4,3 +4,6 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Adam P. Regasz-Rethy's Writings"
+
+[output.html]
+google-analytics = "G-7KL3YRW77E"
