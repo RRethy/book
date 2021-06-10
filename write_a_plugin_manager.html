@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Adam P. Regasz-Rethy&#x27;s Writings</title>
-                <meta name="robots" content="noindex" />
+        <title>Write Your Own Plugin Manager With A Focus On Ergonomics - Adam P. Regasz-Rethy&#x27;s Writings</title>
                 
 
         <!-- Custom HTML head -->
@@ -83,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="mdbook.html">About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">1.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html"><strong aria-hidden="true">2.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li><li class="chapter-item expanded "><a href="write_a_plugin_manager.html"><strong aria-hidden="true">3.</strong> Write Your Own Plugin Manager With A Focus On Ergonomics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="backpack_lua.html"><strong aria-hidden="true">3.1.</strong> Final Source Code</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="mdbook.html">About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">1.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html"><strong aria-hidden="true">2.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li><li class="chapter-item expanded "><a href="write_a_plugin_manager.html" class="active"><strong aria-hidden="true">3.</strong> Write Your Own Plugin Manager With A Focus On Ergonomics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="backpack_lua.html"><strong aria-hidden="true">3.1.</strong> Final Source Code</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,197 +142,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="about-this-book"><a class="header" href="#about-this-book">About this Book</a></h1>
-<p>I've started using <a href="https://github.com/rust-lang/mdBook">mdBook</a> as a way to get better at writing and force myself to have a better understanding of what I'm working on. Hopefully this will help my future self when I need a reference, or potentially someone else.</p>
-<p>In terms of mdBook itself, the best resource I've found is the guide book built with mdBook itself found at https://rust-lang.github.io/mdBook.</p>
-<h2 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h2>
-<p>Create a book with</p>
-<pre><code class="language-sh">cargo install mdbook
-mkdir book
-cd book
-mdbook init
-</code></pre>
-<p>The structure is found in <code>src/SUMMARY.md</code> and supports limited markdown syntax:</p>
-<pre><code class="language-markdown"># This title is ignored
-[Non-numered top-level section](path.md)
-# Unclickable top-level title
-- [Numered chapter title](path2.md)
-    - [Nested sub-chapters](path3.md)
-[Non-numered top-level section](path.md)
-</code></pre>
-<p>The contents files support normal markdown.</p>
-<h2 id="deploy-to-github-pages"><a class="header" href="#deploy-to-github-pages">Deploy to GitHub Pages</a></h2>
-<p>Add a <code>.github/workflows/gh-pages.yml</code> file with the contents:</p>
-<pre><code class="language-yaml">name: github pages
-
-on:
-  push:
-    branches:
-      - master
-
-jobs:
-  deploy:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v1
-        with:
-          mdbook-version: 'latest'
-
-      - run: mdbook build
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./book
-</code></pre>
-<p>Go to <code>https://github.com/{username}/{repo}/settings/pages</code> and ensure the source branch is <code>gh-pages</code>.</p>
-<p>I had to wait some time for it to deploy.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="a-small-zsh-script-to-replace-autojump"><a class="header" href="#a-small-zsh-script-to-replace-autojump">A small ZSH script to replace autojump</a></h1>
-<p>Add this to a <code>~/.zshrc</code> and ensure you have <a href="https://github.com/jhawthorn/fzy">fzy</a> installed.</p>
-<p>When you type <code>jd </code> (<code>jd</code> followed by a space without pressing enter), fzy will pop open and let you change your <code>$PWD</code> to a previously visited directory. For details, just read the comments in the code snippet.</p>
-<p><strong>Note</strong>: To change the keybinding, modify the <code>$JUMPDIR_KEYBIND</code> variable.</p>
-<pre><code class="language-zsh">JUMPDIR_KEYBIND='jd '
-# Setup some data a data file to store visited directories
-mkdir -p &quot;$XDG_DATA_HOME/zshrc&quot;
-JD_DATA_DIR=&quot;$XDG_DATA_HOME/zshrc/chpwd.txt&quot;
-touch $JD_DATA_DIR
-local tmp=$(mktemp)
-cat $JD_DATA_DIR | while read dir ; do [[ -d $dir ]] &amp;&amp; echo $dir ; done &gt; $tmp
-cat $tmp &gt; $JD_DATA_DIR
-# Track visited directories
-chpwd_functions+=(on_chpwd)
-function on_chpwd {
-    local tmp=$(mktemp)
-    { echo $PWD ; cat $JD_DATA_DIR } | sort | uniq 1&gt; $tmp
-    cat $tmp &gt; $JD_DATA_DIR
-}
-# zle widget function
-function fzy_jd {
-    # check if `jd ` was triggered in the middle of another command
-    # e.g. $ aaaaaaajd 
-    # If so, we manually input the `jd `
-    if [[ ! -z $BUFFER ]]; then
-        # Append `jd ` to the prompt
-        BUFFER=$BUFFER$JUMPDIR_KEYBIND
-        # move the cursor to the end of the line
-        zle end-of-line
-        return 0
-    fi
-    # ask the user to select a directory to jump to
-    local dir=$({ echo $HOME ; cat $JD_DATA_DIR } | fzy)
-    if [[ -z $dir ]]; then
-        # no directory was selected, reset the prompt to what it was before
-        zle reset-prompt
-        return 0
-    fi
-    # Setup the command to change the directory
-    BUFFER=&quot;cd $dir&quot;
-    # Accepts the cd we setup above
-    zle accept-line
-    local ret=$?
-    # force the prompt to redraw to mimic what would occur with a normal cd
-    zle reset-prompt
-    return $ret
-}
-# define the new widget function
-zle -N fzy_jd
-# bind the widget function to `jd `
-bindkey $JUMPDIR_KEYBIND fzy_jd
-# a nicety so that executing just jd will mimic the behaviour of just executing
-# cd, that is, change the pwd to $HOME
-eval &quot;alias $(echo $JUMPDIR_KEYBIND|xargs)=cd&quot;
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent"><a class="header" href="#keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent">Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></h1>
-<p>Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the <code>init.lua</code> and restart the editor (or source the <code>init.lua</code>). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This is tedious and nowhere near as clean as VSCode.</p>
-<p>This tutorial will create a similar experience to VSCode where you can select a colorscheme using a dropdown fuzzy finder, and this colorscheme will remain consistent in Neovim and Kitty even if you close them and reopen.</p>
-<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours but you can swap these out for something else.</p>
-<p>We will use a file, <code>$XDG_CONFIG_HOME/.base16_theme</code>, as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours. For example,</p>
-<pre><code>base16-gruvbox-dark-hard
-</code></pre>
-<h2 id="kitty-terminal-setup"><a class="header" href="#kitty-terminal-setup">Kitty (Terminal) Setup</a></h2>
-<p><strong>Note</strong>: These steps only work in <a href="https://sw.kovidgoyal.net/kitty/">kitty</a>.</p>
-<ol>
-<li>Download <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> to <code>$HOME</code></li>
-<li>In a shell startup script (e.g. <code>~/.zshrc</code>), add <code>eval &quot;kitty @ set-colors -c $HOME/base16-kitty/colors/$(cat $XDG_CONFIG_HOME/.base16_theme).conf&quot;</code>. This will set the colours for the current terminal window and for newly created terminal windows.</li>
-</ol>
-<h2 id="neovim-setup"><a class="header" href="#neovim-setup">Neovim Setup</a></h2>
-<ol>
-<li>
-<p>Install <a href="https://github.com/rrethy/nvim-base16">nvim-base16</a> plugin. You can use a different collection of colorschemes but this will match the themes in <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> we used above.</p>
-</li>
-<li>
-<p>Create a function to update the colours for our current terminal window and current instance of Neovim. We'll also need to update our <code>$XDG_CONFIG_HOME/.base16_theme</code>.</p>
-</li>
-</ol>
-<pre><code class="language-lua">-- this is our single source of truth created above
-local base16_theme_fname = vim.fn.expand(vim.env.XDG_CONFIG_HOME..'/.base16_theme')
--- this function is the only way we should be setting our colorscheme
-local function set_colorscheme(name)
-    -- write our colorscheme back to our single source of truth
-    vim.fn.writefile({name}, base16_theme_fname)
-    -- set Neovim's colorscheme
-    vim.cmd('colorscheme '..name)
-    -- execute `kitty @ set-colors -c &lt;color&gt;` to change terminal window's
-    -- colors and newly created terminal windows colors
-    vim.loop.spawn('kitty', {
-        args = {
-            '@',
-            'set-colors',
-            '-c',
-            string.format(vim.env.HOME..'/base16-kitty/colors/%s.conf', name)
-        }
-    }, nil)
-end
-</code></pre>
-<ol start="3">
-<li>Read <code>$XDG_CONFIG_HOME/.base16_theme</code> to determine our current colours to use for Neovim.</li>
-</ol>
-<pre><code class="language-lua">set_colorscheme(vim.fn.readfile(base16_theme_fname)[1])
-</code></pre>
-<ol start="4">
-<li>
-<p>Install <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>. Other fuzzy pickers will work, but this code snippet is for this plugin.</p>
-</li>
-<li>
-<p>Override the <code>colorschemes</code> picker in <code>telescope.nvim</code> to update our terminal colours too</p>
-</li>
-</ol>
-<pre><code class="language-lua">nvim.nnoremap('&lt;leader&gt;c', function()
-    -- get our base16 colorschemes
-    local colors = vim.fn.getcompletion('base16', 'color')
-    -- we're trying to mimic VSCode so we'll use dropdown theme
-    local theme = require('telescope.themes').get_dropdown()
-    -- create our picker
-    require('telescope.pickers').new(theme, {
-        prompt = 'Change Base16 Colorscheme',
-        finder = require('telescope.finders').new_table {
-            results = colors
-        },
-        sorter = require('telescope.config').values.generic_sorter(theme),
-        attach_mappings = function(bufnr)
-            -- change the colors upon selection
-            telescope_actions.select_default:replace(function()
-                set_colorscheme(action_state.get_selected_entry().value)
-                telescope_actions.close(bufnr)
-            end)
-            telescope_action_set.shift_selection:enhance({
-                -- change the colors upon scrolling
-                post = function()
-                    set_colorscheme(action_state.get_selected_entry().value)
-                end
-            })
-            return true
-        end
-    }):find()
-end)
-</code></pre>
-<h2 id="try-it-out"><a class="header" href="#try-it-out">Try it out</a></h2>
-<p>Open up Neovim, and hit <code>&lt;leader&gt;c</code> (or whatever mapping you used) and search for a colorscheme. As you scroll through the available colorschemes Neovim should update and Kitty should remain consistant. If you close then open Neovim, the colorscheme will persist with manually changing anything else. Not only that, but you can close and open Kitty and both Kitty and Neovim will maintain the previously selected colorscheme.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="write-your-own-plugin-manager-with-a-focus-on-ergonomics"><a class="header" href="#write-your-own-plugin-manager-with-a-focus-on-ergonomics">Write Your Own Plugin Manager With A Focus On Ergonomics</a></h1>
+                        <h1 id="write-your-own-plugin-manager-with-a-focus-on-ergonomics"><a class="header" href="#write-your-own-plugin-manager-with-a-focus-on-ergonomics">Write Your Own Plugin Manager With A Focus On Ergonomics</a></h1>
 <p><em>Note: This is written with Neovim in mind but the same concepts can be applied to Vim</em></p>
 <p>I've been pretty dissatisfied with the state of plugin managers in Neovim. Almost all of them follow a similar flow of editing your <code>init.lua</code>/<code>init.vim</code>, running an install command, and restarting Neovim to have the plugin loaded and ready to use. If we compare that with VSCode, we click a button to install the extension, and it usually <em>just works</em> with the occasional need to restart the editor. It's a lot more streamlined in VSCode and not having to restart the editor or manually edit config files is much smoother. What's worse is this is all functionality that can be mimicked in Neovim with a clever use of <code>:h packages</code>.</p>
 <p>At the end of this article we'll have a small plugin manager (~130 lines of Lua) that will let you install the plugin with a simple <code>:PackAdd https://github.com/RRethy/vim-illuminate</code> which will make it instantly available without the need for a restart and you won't need to touch your dotfiles. Removing the plugin will be as easy as deleting a line in the manifest (we'll get to this later).</p>
@@ -554,143 +363,18 @@ end
 </ul>
 </li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><pre><code class="language-lua">local echoerr = vim.api.nvim_err_writeln
-
-local M = {}
-
-local opt = vim.fn.stdpath('data')..'/site/pack/backpack/opt/'
-local manifest = vim.fn.stdpath('config')..'/packmanifest.lua'
-
-local function parse_url(url)
-    local username, plugin = string.match(url, '^https://github.com/([^/]+)/([^/]+)$')
-    if not username or not plugin then
-        return
-    end
-
-    local git_url
-    if username == 'your GitHub username' then
-        git_url = string.format('git@github.com:%s/%s.git', username, plugin)
-    else
-        git_url = string.format('https://github.com/%s/%s.git', username, plugin)
-    end
-
-    return git_url, username, plugin
-end
-
-local function git_pull(name, on_success)
-    local dir = opt..name
-    local branch = vim.fn.system(&quot;git -C &quot;..dir..&quot; branch --show-current | tr -d '\n'&quot;)
-    vim.loop.spawn('git', {
-        args = { 'pull', 'origin', branch, '--update-shallow', '--ff-only', '--progress', '--rebase=false' },
-        cwd = dir,
-    }, vim.schedule_wrap(function(code)
-            if code == 0 then
-                on_success(name)
-            else
-                echoerr(name..' pulled unsuccessfully')
-            end
-        end))
-end
-
-local function git_clone(name, git_url, on_success)
-    vim.loop.spawn('git', {
-        args = { 'clone', '--depth=1', git_url },
-        cwd = opt,
-    }, vim.schedule_wrap(function(code)
-            if code == 0 then
-                on_success(name)
-            else
-                echoerr(name..' cloned unsuccessfully')
-            end
-        end))
-end
-
-function M.setup()
-    vim.fn.mkdir(opt, 'p')
-
-    M.plugins = {}
-    _G.use = function(opts)
-        local _, _, author, plugin = string.find(opts[1], '^([^ /]+)/([^ /]+)$')
-        table.insert(M.plugins, {
-            plugin = plugin,
-            author = author,
-            post_update = opts.post_update,
-        })
-        if vim.fn.isdirectory(opt..'/'..plugin) ~= 0 then
-            vim.cmd('packadd! '..plugin)
-        end
-    end
-    if vim.fn.filereadable(manifest) ~= 0 then
-        dofile(manifest)
-    end
-    _G.use = nil
-
-    vim.cmd [[ command! -nargs=1 PackAdd lua require('rrethy.backpack').pack_add(&lt;f-args&gt;) ]]
-    vim.cmd [[ command! PackUpdate lua require('rrethy.backpack').pack_update() ]]
-    vim.cmd [[ command! PackEdit lua require('rrethy.backpack').pack_edit() ]]
-end
-
-function M.pack_add(url)
-    local git_url, author, plugin = parse_url(url)
-    if not git_url then
-        return
-    end
-
-    table.insert(M.plugins, {
-        plugin = plugin,
-        author = author,
-    })
-    local on_success = function()
-        vim.cmd('packadd '..plugin)
-    end
-    if vim.fn.isdirectory(opt..plugin) ~= 0 then
-        git_pull(plugin, on_success)
-    else
-        git_clone(plugin, git_url, on_success)
-    end
-
-    vim.fn.system(string.format('echo &quot;use { \'%s/%s\' }&quot; &gt;&gt; %s', author, plugin, manifest))
-end
-
-function M.pack_update()
-    for _, data in ipairs(M.plugins) do
-        local on_success = function(plugin)
-            vim.cmd('packadd '..plugin)
-            if data.post_update then
-                local dir = opt..'/'..plugin
-                if type(data.post_update) == 'function' then
-                    data.post_update(dir)
-                elseif type(data.post_update) == 'table' then
-                    vim.loop.spawn(data.post_update[1], { args = data.post_update.args, cwd = dir },
-                        vim.schedule_wrap(function(code)
-                            if code ~= 0 then
-                                vim.api.nvim_err_writeln(string.format('Failed to run %s', vim.inspect(data.post_update)))
-                            end
-                        end))
-                end
-            end
-        end
-        if vim.fn.isdirectory(opt..data.plugin) ~= 0 then
-            git_pull(data.plugin, on_success)
-        else
-            git_clone(data.plugin, git_clone, on_success)
-        end
-    end
-end
-
-function M.pack_edit()
-    vim.cmd('tabnew')
-    vim.cmd('edit '..manifest)
-end
-
-return M
-</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="colorscheme.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
                         
+                                                    <a rel="next" href="backpack_lua.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         
                         <div style="clear: both"></div>
                     </nav>
@@ -698,7 +382,13 @@ return M
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="colorscheme.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
                 
+                                    <a rel="next" href="backpack_lua.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
                             </nav>
 
         </div>
@@ -737,11 +427,6 @@ return M
 
         <!-- Custom JS scripts -->
         
-                        <script type="text/javascript">
-        window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
-        });
-        </script>
-                
+        
     </body>
 </html>

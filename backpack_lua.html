@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent - Adam P. Regasz-Rethy&#x27;s Writings</title>
+        <title>Final Source Code - Adam P. Regasz-Rethy&#x27;s Writings</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="mdbook.html">About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">1.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html" class="active"><strong aria-hidden="true">2.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li><li class="chapter-item expanded "><a href="write_a_plugin_manager.html"><strong aria-hidden="true">3.</strong> Write Your Own Plugin Manager With A Focus On Ergonomics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="backpack_lua.html"><strong aria-hidden="true">3.1.</strong> Final Source Code</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="mdbook.html">About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">1.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html"><strong aria-hidden="true">2.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li><li class="chapter-item expanded "><a href="write_a_plugin_manager.html"><strong aria-hidden="true">3.</strong> Write Your Own Plugin Manager With A Focus On Ergonomics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="backpack_lua.html" class="active"><strong aria-hidden="true">3.1.</strong> Final Source Code</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -142,104 +142,146 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent"><a class="header" href="#keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent">Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></h1>
-<p>Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the <code>init.lua</code> and restart the editor (or source the <code>init.lua</code>). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This is tedious and nowhere near as clean as VSCode.</p>
-<p>This tutorial will create a similar experience to VSCode where you can select a colorscheme using a dropdown fuzzy finder, and this colorscheme will remain consistent in Neovim and Kitty even if you close them and reopen.</p>
-<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours but you can swap these out for something else.</p>
-<p>We will use a file, <code>$XDG_CONFIG_HOME/.base16_theme</code>, as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours. For example,</p>
-<pre><code>base16-gruvbox-dark-hard
-</code></pre>
-<h2 id="kitty-terminal-setup"><a class="header" href="#kitty-terminal-setup">Kitty (Terminal) Setup</a></h2>
-<p><strong>Note</strong>: These steps only work in <a href="https://sw.kovidgoyal.net/kitty/">kitty</a>.</p>
-<ol>
-<li>Download <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> to <code>$HOME</code></li>
-<li>In a shell startup script (e.g. <code>~/.zshrc</code>), add <code>eval &quot;kitty @ set-colors -c $HOME/base16-kitty/colors/$(cat $XDG_CONFIG_HOME/.base16_theme).conf&quot;</code>. This will set the colours for the current terminal window and for newly created terminal windows.</li>
-</ol>
-<h2 id="neovim-setup"><a class="header" href="#neovim-setup">Neovim Setup</a></h2>
-<ol>
-<li>
-<p>Install <a href="https://github.com/rrethy/nvim-base16">nvim-base16</a> plugin. You can use a different collection of colorschemes but this will match the themes in <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> we used above.</p>
-</li>
-<li>
-<p>Create a function to update the colours for our current terminal window and current instance of Neovim. We'll also need to update our <code>$XDG_CONFIG_HOME/.base16_theme</code>.</p>
-</li>
-</ol>
-<pre><code class="language-lua">-- this is our single source of truth created above
-local base16_theme_fname = vim.fn.expand(vim.env.XDG_CONFIG_HOME..'/.base16_theme')
--- this function is the only way we should be setting our colorscheme
-local function set_colorscheme(name)
-    -- write our colorscheme back to our single source of truth
-    vim.fn.writefile({name}, base16_theme_fname)
-    -- set Neovim's colorscheme
-    vim.cmd('colorscheme '..name)
-    -- execute `kitty @ set-colors -c &lt;color&gt;` to change terminal window's
-    -- colors and newly created terminal windows colors
-    vim.loop.spawn('kitty', {
-        args = {
-            '@',
-            'set-colors',
-            '-c',
-            string.format(vim.env.HOME..'/base16-kitty/colors/%s.conf', name)
-        }
-    }, nil)
+                        <pre><code class="language-lua">local echoerr = vim.api.nvim_err_writeln
+
+local M = {}
+
+local opt = vim.fn.stdpath('data')..'/site/pack/backpack/opt/'
+local manifest = vim.fn.stdpath('config')..'/packmanifest.lua'
+
+local function parse_url(url)
+    local username, plugin = string.match(url, '^https://github.com/([^/]+)/([^/]+)$')
+    if not username or not plugin then
+        return
+    end
+
+    local git_url
+    if username == 'your GitHub username' then
+        git_url = string.format('git@github.com:%s/%s.git', username, plugin)
+    else
+        git_url = string.format('https://github.com/%s/%s.git', username, plugin)
+    end
+
+    return git_url, username, plugin
 end
-</code></pre>
-<ol start="3">
-<li>Read <code>$XDG_CONFIG_HOME/.base16_theme</code> to determine our current colours to use for Neovim.</li>
-</ol>
-<pre><code class="language-lua">set_colorscheme(vim.fn.readfile(base16_theme_fname)[1])
-</code></pre>
-<ol start="4">
-<li>
-<p>Install <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>. Other fuzzy pickers will work, but this code snippet is for this plugin.</p>
-</li>
-<li>
-<p>Override the <code>colorschemes</code> picker in <code>telescope.nvim</code> to update our terminal colours too</p>
-</li>
-</ol>
-<pre><code class="language-lua">nvim.nnoremap('&lt;leader&gt;c', function()
-    -- get our base16 colorschemes
-    local colors = vim.fn.getcompletion('base16', 'color')
-    -- we're trying to mimic VSCode so we'll use dropdown theme
-    local theme = require('telescope.themes').get_dropdown()
-    -- create our picker
-    require('telescope.pickers').new(theme, {
-        prompt = 'Change Base16 Colorscheme',
-        finder = require('telescope.finders').new_table {
-            results = colors
-        },
-        sorter = require('telescope.config').values.generic_sorter(theme),
-        attach_mappings = function(bufnr)
-            -- change the colors upon selection
-            telescope_actions.select_default:replace(function()
-                set_colorscheme(action_state.get_selected_entry().value)
-                telescope_actions.close(bufnr)
-            end)
-            telescope_action_set.shift_selection:enhance({
-                -- change the colors upon scrolling
-                post = function()
-                    set_colorscheme(action_state.get_selected_entry().value)
-                end
-            })
-            return true
+
+local function git_pull(name, on_success)
+    local dir = opt..name
+    local branch = vim.fn.system(&quot;git -C &quot;..dir..&quot; branch --show-current | tr -d '\n'&quot;)
+    vim.loop.spawn('git', {
+        args = { 'pull', 'origin', branch, '--update-shallow', '--ff-only', '--progress', '--rebase=false' },
+        cwd = dir,
+    }, vim.schedule_wrap(function(code)
+            if code == 0 then
+                on_success(name)
+            else
+                echoerr(name..' pulled unsuccessfully')
+            end
+        end))
+end
+
+local function git_clone(name, git_url, on_success)
+    vim.loop.spawn('git', {
+        args = { 'clone', '--depth=1', git_url },
+        cwd = opt,
+    }, vim.schedule_wrap(function(code)
+            if code == 0 then
+                on_success(name)
+            else
+                echoerr(name..' cloned unsuccessfully')
+            end
+        end))
+end
+
+function M.setup()
+    vim.fn.mkdir(opt, 'p')
+
+    M.plugins = {}
+    _G.use = function(opts)
+        local _, _, author, plugin = string.find(opts[1], '^([^ /]+)/([^ /]+)$')
+        table.insert(M.plugins, {
+            plugin = plugin,
+            author = author,
+            post_update = opts.post_update,
+        })
+        if vim.fn.isdirectory(opt..'/'..plugin) ~= 0 then
+            vim.cmd('packadd! '..plugin)
         end
-    }):find()
-end)
+    end
+    if vim.fn.filereadable(manifest) ~= 0 then
+        dofile(manifest)
+    end
+    _G.use = nil
+
+    vim.cmd [[ command! -nargs=1 PackAdd lua require('rrethy.backpack').pack_add(&lt;f-args&gt;) ]]
+    vim.cmd [[ command! PackUpdate lua require('rrethy.backpack').pack_update() ]]
+    vim.cmd [[ command! PackEdit lua require('rrethy.backpack').pack_edit() ]]
+end
+
+function M.pack_add(url)
+    local git_url, author, plugin = parse_url(url)
+    if not git_url then
+        return
+    end
+
+    table.insert(M.plugins, {
+        plugin = plugin,
+        author = author,
+    })
+    local on_success = function()
+        vim.cmd('packadd '..plugin)
+    end
+    if vim.fn.isdirectory(opt..plugin) ~= 0 then
+        git_pull(plugin, on_success)
+    else
+        git_clone(plugin, git_url, on_success)
+    end
+
+    vim.fn.system(string.format('echo &quot;use { \'%s/%s\' }&quot; &gt;&gt; %s', author, plugin, manifest))
+end
+
+function M.pack_update()
+    for _, data in ipairs(M.plugins) do
+        local on_success = function(plugin)
+            vim.cmd('packadd '..plugin)
+            if data.post_update then
+                local dir = opt..'/'..plugin
+                if type(data.post_update) == 'function' then
+                    data.post_update(dir)
+                elseif type(data.post_update) == 'table' then
+                    vim.loop.spawn(data.post_update[1], { args = data.post_update.args, cwd = dir },
+                        vim.schedule_wrap(function(code)
+                            if code ~= 0 then
+                                vim.api.nvim_err_writeln(string.format('Failed to run %s', vim.inspect(data.post_update)))
+                            end
+                        end))
+                end
+            end
+        end
+        if vim.fn.isdirectory(opt..data.plugin) ~= 0 then
+            git_pull(data.plugin, on_success)
+        else
+            git_clone(data.plugin, git_clone, on_success)
+        end
+    end
+end
+
+function M.pack_edit()
+    vim.cmd('tabnew')
+    vim.cmd('edit '..manifest)
+end
+
+return M
 </code></pre>
-<h2 id="try-it-out"><a class="header" href="#try-it-out">Try it out</a></h2>
-<p>Open up Neovim, and hit <code>&lt;leader&gt;c</code> (or whatever mapping you used) and search for a colorscheme. As you scroll through the available colorschemes Neovim should update and Kitty should remain consistant. If you close then open Neovim, the colorscheme will persist with manually changing anything else. Not only that, but you can close and open Kitty and both Kitty and Neovim will maintain the previously selected colorscheme.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="jd.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="write_a_plugin_manager.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="write_a_plugin_manager.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
                         <div style="clear: both"></div>
                     </nav>
@@ -247,13 +289,10 @@ end)
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="jd.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="write_a_plugin_manager.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="write_a_plugin_manager.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                             </nav>
 
         </div>
