@@ -4,40 +4,28 @@
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Adam P. Regasz-Rethy&#x27;s Writings</title>
-        
-        <meta name="robots" content="noindex" />
-        
-        
-
+                <meta name="robots" content="noindex" />
+                
 
         <!-- Custom HTML head -->
         
-
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-        
-        <link rel="icon" href="favicon.svg">
-        
-        
-        <link rel="shortcut icon" href="favicon.png">
-        
-        <link rel="stylesheet" href="css/variables.css">
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
         
-        <link rel="stylesheet" href="css/print.css" media="print">
-        
-
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
         
-        <link rel="stylesheet" href="fonts/fonts.css">
-        
-
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
@@ -45,9 +33,7 @@
 
         <!-- Custom theme stylesheets -->
         
-
-        
-    </head>
+            </head>
     <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
@@ -97,8 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="mdbook.html"><strong aria-hidden="true">1.</strong> About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">2.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html"><strong aria-hidden="true">3.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li></ol>
-            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="mdbook.html">About this book</a></li><li class="chapter-item expanded "><a href="jd.html"><strong aria-hidden="true">1.</strong> A small ZSH script to replace autojump</a></li><li class="chapter-item expanded "><a href="colorscheme.html"><strong aria-hidden="true">2.</strong> Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -122,27 +107,21 @@
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
-                        
-                    </div>
+                                            </div>
 
                     <h1 class="menu-title">Adam P. Regasz-Rethy&#x27;s Writings</h1>
 
                     <div class="right-buttons">
-                        
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
-                        
-                        
-                    </div>
+                                                                    </div>
                 </div>
 
-                
-                <div id="search-wrapper" class="hidden">
+                                <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
                         <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
@@ -153,7 +132,6 @@
                     </div>
                 </div>
                 
-
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script type="text/javascript">
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -214,7 +192,7 @@ jobs:
 </code></pre>
 <p>Go to <code>https://github.com/{username}/{repo}/settings/pages</code> and ensure the source branch is <code>gh-pages</code>.</p>
 <p>I had to wait some time for it to deploy.</p>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="a-small-zsh-script-to-replace-autojump"><a class="header" href="#a-small-zsh-script-to-replace-autojump">A small ZSH script to replace autojump</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="a-small-zsh-script-to-replace-autojump"><a class="header" href="#a-small-zsh-script-to-replace-autojump">A small ZSH script to replace autojump</a></h1>
 <p>Add this to a <code>~/.zshrc</code> and ensure you have <a href="https://github.com/jhawthorn/fzy">fzy</a> installed.</p>
 <p>When you type <code>jd </code> (<code>jd</code> followed by a space without pressing enter), fzy will pop open and let you change your <code>$PWD</code> to a previously visited directory. For details, just read the comments in the code snippet.</p>
 <p><strong>Note</strong>: To change the keybinding, modify the <code>$JUMPDIR_KEYBIND</code> variable.</p>
@@ -269,84 +247,98 @@ bindkey $JUMPDIR_KEYBIND fzy_jd
 # cd, that is, change the pwd to $HOME
 eval &quot;alias $(echo $JUMPDIR_KEYBIND|xargs)=cd&quot;
 </code></pre>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent"><a class="header" href="#keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent">Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></h1>
-<p>Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the <code>init.lua</code> and restart the editor (or source the <code>init.lua</code>). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This ir tedious and nowhere near as clean as VSCode, let's see how close we can get.</p>
-<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours, but this works equally well without them.</p>
-<h2 id="single-source-of-truth"><a class="header" href="#single-source-of-truth">Single Source of Truth</a></h2>
-<p>We will use a file <code>~/.config/.base16_theme</code> as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent"><a class="header" href="#keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent">Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></h1>
+<p>Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the <code>init.lua</code> and restart the editor (or source the <code>init.lua</code>). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This is tedious and nowhere near as clean as VSCode.</p>
+<p>This tutorial will create a similar experience to VSCode where you can select a colorscheme using a dropdown fuzzy finder, and this colorscheme will remain consistent in Neovim and Kitty even if you close them and reopen.</p>
+<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours, but all you need are consistent colors for Neovim and Kitty.</p>
+<p>We will use a file <code>$XDG_CONFIG_HOME/.base16_theme</code> as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours. For example,</p>
+<pre><code>base16-gruvbox-dark-hard
+</code></pre>
 <h2 id="kitty-terminal-setup"><a class="header" href="#kitty-terminal-setup">Kitty (Terminal) Setup</a></h2>
 <p><strong>Note</strong>: These steps only work in <a href="https://sw.kovidgoyal.net/kitty/">kitty</a> but a similar procedure could be used for other editors.</p>
 <ol>
-<li>Download <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> (This tutorial assumes <code>~/.config/kitty/</code> as the download location)</li>
-<li>In a shell startup script (e.g. <code>~/.zshrc</code>), add <code>eval &quot;kitty @ set-colors -c $HOME/.config/kitty/base16-kitty/colors/$(cat $XDG_CONFIG_HOME/.base16_theme).conf&quot;</code>. This will set the colours for the current terminal window and for newly created terminal windows.</li>
+<li>Download <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> to <code>$HOME</code></li>
+<li>In a shell startup script (e.g. <code>~/.zshrc</code>), add <code>eval &quot;kitty @ set-colors -c $HOME/base16-kitty/colors/$(cat $XDG_CONFIG_HOME/.base16_theme).conf&quot;</code>. This will set the colours for the current terminal window and for newly created terminal windows.</li>
 </ol>
-<h2 id="neovim"><a class="header" href="#neovim">Neovim</a></h2>
-<p>We will be adding the following code snippets to our <code>init.lua</code>.</p>
+<h2 id="neovim-setup"><a class="header" href="#neovim-setup">Neovim Setup</a></h2>
 <ol>
 <li>
-<p>Install <a href="https://github.com/rrethy/nvim-base16">nvim-base16</a> plugin. It's optional but it has all the colorschemes we need.</p>
+<p>Install <a href="https://github.com/rrethy/nvim-base16">nvim-base16</a> plugin. You can use a different collection of colorschemes but this will match the themes in <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> we used above.</p>
 </li>
 <li>
-<p>Read <code>~/.config/.base16_theme</code> to determine our current colours to use for Neovim.</p>
+<p>Create a function to update the colours for our current terminal window and current instance of Neovim. We'll also need to update our <code>$XDG_CONFIG_HOME/.base16_theme</code>.</p>
 </li>
 </ol>
-<pre><code class="language-lua">local base16_theme_fname = vim.fn.expand('~/.config/.base16_theme')
-vim.cmd('colorscheme '..vim.fn.readfile(base16_theme_fname)[1])
-</code></pre>
-<ol start="3">
-<li>Create a function to update the colours for our current terminal window and current instance of Neovim.</li>
-</ol>
-<pre><code class="language-lua">local function set_colorscheme(name)
+<pre><code class="language-lua">-- this is our single source of truth created above
+local base16_theme_fname = vim.fn.expand(vim.env.XDG_CONFIG_HOME..'/.base16_theme')
+local function set_colorscheme(name)
+    -- write our colorscheme back to our single source of truth
     vim.fn.writefile({name}, base16_theme_fname)
+    -- set Neovim's colorscheme
     vim.cmd('colorscheme '..name)
+    -- execute `kitty @ set-colors -c &lt;color&gt;` to change terminal window's
+    -- colors and newly created terminal windows colors
     vim.loop.spawn('kitty', {
         args = {
             '@',
-            '--to',
-            vim.env.KITTY_LISTEN_ON,
             'set-colors',
             '-c',
-            string.format('~/.config/kitty/base16-kitty/colors/%s.conf', name)
+            string.format(vim.env.HOME..'/base16-kitty/colors/%s.conf', name)
         }
     }, nil)
 end
 </code></pre>
+<ol start="3">
+<li>Read <code>$XDG_CONFIG_HOME/.base16_theme</code> to determine our current colours to use for Neovim.</li>
+</ol>
+<pre><code class="language-lua">set_colorscheme(vim.fn.readfile(base16_theme_fname)[1])
+</code></pre>
 <ol start="4">
 <li>
-<p>Install <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>. It's also optional since other fuzzy finders can be used, but the code snippets will be specific to this plugin.</p>
+<p>Install <a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>. Other fuzzy pickers will work, but this code snippet is for this plugin.</p>
 </li>
 <li>
 <p>Override the <code>colorschemes</code> picker in <code>telescope.nvim</code> to update our terminal colours too</p>
 </li>
 </ol>
 <pre><code class="language-lua">nvim.nnoremap('&lt;leader&gt;c', function()
-    return telescope_builtin.colorscheme(telescope_themes.get_dropdown({
-        prompt_title = 'Change Colorscheme',
+    -- get our base16 colorschemes
+    local colors = vim.fn.getcompletion('base16', 'color')
+    -- we're trying to mimic VSCode so we'll use dropdown theme
+    local theme = require('telescope.themes').get_dropdown()
+    -- create our picker
+    require('telescope.pickers').new(theme, {
+        prompt = 'Change Base16 Colorscheme',
+        finder = require('telescope.finders').new_table {
+            results = colors
+        },
+        sorter = require('telescope.config').values.generic_sorter(theme),
         attach_mappings = function(bufnr)
+            -- change the colors upon selection
             telescope_actions.select_default:replace(function()
                 set_colorscheme(action_state.get_selected_entry().value)
                 telescope_actions.close(bufnr)
             end)
             telescope_action_set.shift_selection:enhance({
+                -- change the colors upon scrolling
                 post = function()
                     set_colorscheme(action_state.get_selected_entry().value)
                 end
             })
-        return true
-    end}))
+            return true
+        end
+    }):find()
 end)
 </code></pre>
-<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
-<p>Try it out with <code>&lt;leader&gt;c</code>, it'll update your Neovim colours and persist this change as your restart either Neovim or your Terminal. It's about as hands off as your can get.</p>
+<h2 id="try-it-out"><a class="header" href="#try-it-out">Try it out</a></h2>
+<p>Open up Neovim, and hit <code>&lt;leader&gt;c</code> (or whatever mapping you used) and search for a colorscheme. As you scroll through the available colorschemes Neovim should update and Kitty should remain consistant. If you close then open Neovim, the colorscheme will persist with manually changing anything else. Not only that, but you can close and open Kitty and both Kitty and Neovim will maintain the previously selected colorscheme.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-
                         
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -354,16 +346,12 @@ end)
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-
-                
-            </nav>
+                            </nav>
 
         </div>
 
         
-
-        
-        <!-- Google Analytics Tag -->
+                <!-- Google Analytics Tag -->
         <script type="text/javascript">
             var localAddrs = ["localhost", "127.0.0.1", ""];
 
@@ -380,39 +368,27 @@ end)
             }
         </script>
         
-
         
-
-        
-        <script type="text/javascript">
+                <script type="text/javascript">
             window.playground_copyable = true;
         </script>
         
-
         
-
-        
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
         
-
         <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
         
-
-        
-        
-        <script type="text/javascript">
+                        <script type="text/javascript">
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });
         </script>
-        
-        
-
+                
     </body>
 </html>
