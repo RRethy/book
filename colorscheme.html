@@ -145,12 +145,12 @@
                         <h1 id="keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent"><a class="header" href="#keeping-neovim-and-kitty-terminal-colorschemes-consistent-and-persistent">Keeping Neovim and Kitty Terminal Colorschemes Consistent and Persistent</a></h1>
 <p>Whether it's to give my editor a new coat of paint or to make it easier on the eyes for 3am programming, I change its colours all the time. In editors such as Visual Studio Code or Atom, this is a simple matter of choosing a theme from a fuzzy matched drop-down menu. However, in Neovim we have to edit the <code>init.lua</code> and restart the editor (or source the <code>init.lua</code>). On top of this, we then need to update our terminal's colours to match (or at least I like to keep them consistent). This is tedious and nowhere near as clean as VSCode.</p>
 <p>This tutorial will create a similar experience to VSCode where you can select a colorscheme using a dropdown fuzzy finder, and this colorscheme will remain consistent in Neovim and Kitty even if you close them and reopen.</p>
-<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours, but all you need are consistent colors for Neovim and Kitty.</p>
-<p>We will use a file <code>$XDG_CONFIG_HOME/.base16_theme</code> as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours. For example,</p>
+<p><strong>Note</strong>: We will be using <a href="https://github.com/chriskempson/base16">base16</a> colours but you can swap these out for something else.</p>
+<p>We will use a file, <code>$XDG_CONFIG_HOME/.base16_theme</code>, as the single source of truth for our current colours. It will contain a single line with the name of our current base16 colours. For example,</p>
 <pre><code>base16-gruvbox-dark-hard
 </code></pre>
 <h2 id="kitty-terminal-setup"><a class="header" href="#kitty-terminal-setup">Kitty (Terminal) Setup</a></h2>
-<p><strong>Note</strong>: These steps only work in <a href="https://sw.kovidgoyal.net/kitty/">kitty</a> but a similar procedure could be used for other editors.</p>
+<p><strong>Note</strong>: These steps only work in <a href="https://sw.kovidgoyal.net/kitty/">kitty</a>.</p>
 <ol>
 <li>Download <a href="https://github.com/kdrag0n/base16-kitty">base16-kitty</a> to <code>$HOME</code></li>
 <li>In a shell startup script (e.g. <code>~/.zshrc</code>), add <code>eval &quot;kitty @ set-colors -c $HOME/base16-kitty/colors/$(cat $XDG_CONFIG_HOME/.base16_theme).conf&quot;</code>. This will set the colours for the current terminal window and for newly created terminal windows.</li>
@@ -166,6 +166,7 @@
 </ol>
 <pre><code class="language-lua">-- this is our single source of truth created above
 local base16_theme_fname = vim.fn.expand(vim.env.XDG_CONFIG_HOME..'/.base16_theme')
+-- this function is the only way we should be setting our colorscheme
 local function set_colorscheme(name)
     -- write our colorscheme back to our single source of truth
     vim.fn.writefile({name}, base16_theme_fname)
