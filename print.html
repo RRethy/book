@@ -502,34 +502,23 @@ end
 </code></pre>
 <h2 id="post-update-hooks"><a class="header" href="#post-update-hooks">Post-Update Hooks</a></h2>
 <p>We were also tracking post-update hooks which is the only additional feature we'll be adding (see below for other feature that were intentionally omitted). This can take the form of a lua function callback or a table representing shell commands to run in the root of the plugin.</p>
-<pre><code class="language-lua">-- function M.pack_update()
---     for _, data in ipairs(M.plugins) do
---         local on_success = function(plugin)
---             vim.cmd('packadd '..plugin)
-            if data.post_update then
-                -- plugin root directory
-                local dir = opt..'/'..plugin
-                if type(data.post_update) == 'function' then
-                    -- execute the function and pass it the plugin dir
-                    data.post_update(dir)
-                elseif type(data.post_update) == 'table' then
-                    -- use Luv to run the shell command in the plugin dir
-                    vim.loop.spawn(data.post_update[1], { args = data.post_update.args, cwd = dir },
-                        vim.schedule_wrap(function(code)
-                            if code ~= 0 then
-                                vim.api.nvim_err_writeln(string.format('Failed to run %s', vim.inspect(data.post_update)))
-                            end
-                        end))
+<p>We'll add this in <code>M.pack_update</code> after we dynamically reload the plugin in the <code>on_success</code> callback.</p>
+<pre><code class="language-lua">if data.post_update then
+    -- plugin root directory
+    local dir = opt..'/'..plugin
+    if type(data.post_update) == 'function' then
+        -- execute the function and pass it the plugin dir
+        data.post_update(dir)
+    elseif type(data.post_update) == 'table' then
+        -- use Luv to run the shell command in the plugin dir
+        vim.loop.spawn(data.post_update[1], { args = data.post_update.args, cwd = dir },
+            vim.schedule_wrap(function(code)
+                if code ~= 0 then
+                    vim.api.nvim_err_writeln(string.format('Failed to run %s', vim.inspect(data.post_update)))
                 end
-            end
---         end
---         if vim.fn.isdirectory(opt..data.plugin) ~= 0 then
---             git_pull(data.plugin, on_success)
---         else
---             git_clone(data.plugin, git_clone, on_success)
---         end
---     end
--- end
+            end))
+    end
+end
 </code></pre>
 <h3 id="what-we-left-out-and-why"><a class="header" href="#what-we-left-out-and-why">What We Left Out (And Why)</a></h3>
 <ol>
