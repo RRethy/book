@@ -311,10 +311,10 @@ end
 </code></pre>
 <h2 id="post-update-hooks"><a class="header" href="#post-update-hooks">Post-Update Hooks</a></h2>
 <p>We were also tracking post-update hooks which is the only additional feature we'll be adding (see below for other feature that were intentionally omitted). This can take the form of a lua function callback or a table representing shell commands to run in the root of the plugin.</p>
-<pre><code class="language-lua"># function M.pack_update()
-#     for _, data in ipairs(M.plugins) do
-#         local on_success = function(plugin)
-#             vim.cmd('packadd '..plugin)
+<pre><code class="language-lua">-- function M.pack_update()
+--     for _, data in ipairs(M.plugins) do
+--         local on_success = function(plugin)
+--             vim.cmd('packadd '..plugin)
             if data.post_update then
                 -- plugin root directory
                 local dir = opt..'/'..plugin
@@ -331,14 +331,14 @@ end
                         end))
                 end
             end
-#         end
-#         if vim.fn.isdirectory(opt..data.plugin) ~= 0 then
-#             git_pull(data.plugin, on_success)
-#         else
-#             git_clone(data.plugin, git_clone, on_success)
-#         end
-#     end
-# end
+--         end
+--         if vim.fn.isdirectory(opt..data.plugin) ~= 0 then
+--             git_pull(data.plugin, on_success)
+--         else
+--             git_clone(data.plugin, git_clone, on_success)
+--         end
+--     end
+-- end
 </code></pre>
 <h3 id="what-we-left-out-and-why"><a class="header" href="#what-we-left-out-and-why">What We Left Out (And Why)</a></h3>
 <ol>
