@@ -49,6 +49,16 @@ local M = {}
 local opt = vim.fn.stdpath('data')..'/site/pack/backpack/opt/'
 local manifest = vim.fn.stdpath('config')..'/packmanifest.lua'
 
+local GITHUB_USERNAME = '<your github username>'
+
+local function to_git_url(author, plugin)
+    if author == GITHUB_USERNAME then
+        return string.format('git@github.com:%s/%s.git', author, plugin)
+    else
+        return string.format('https://github.com:%s/%s.git', author, plugin)
+    end
+end
+
 function M.setup()
     vim.fn.mkdir(opt, 'p') -- make sure opt exists
 
@@ -62,11 +72,15 @@ function M.setup()
             author = author,
             post_update = opts.post_update,
         })
+        -- adds the plugin to the end of :help 'runtimepath'
+        -- this will be what makes the plugin sourced
+        -- NOTE: :packadd! is not the same as :packadd
         if vim.fn.isdirectory(opt..'/'..plugin) ~= 0 then
-            -- adds the plugin to the end of :help 'runtimepath'
-            -- this will be what makes the plugin sourced
-            -- NOTE: :packadd! is not the same as :packadd
             vim.cmd('packadd! '..plugin)
+        else
+            git_clone(plugin, to_git_url(author, plugin), function()
+                vim.cmd('packadd! '..plugin)
+            end)
         end
     end
     if vim.fn.filereadable(manifest) ~= 0 then
@@ -103,7 +117,7 @@ local function parse_url(url)
     end
 
     local git_url
-    if username == 'your username here' then
+    if username == GITHUB_USERNAME then
         -- a nicety for plugins that you wrote, prefer ssh over https
         git_url = string.format('git@github.com:%s/%s.git', username, plugin)
     else
