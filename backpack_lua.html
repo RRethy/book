@@ -143,11 +143,20 @@
                 <div id="content" class="content">
                     <main>
                         <pre><code class="language-lua">local echoerr = vim.api.nvim_err_writeln
+local GITHUB_USERNAME = '&lt;your username here&gt;'
 
 local M = {}
 
 local opt = vim.fn.stdpath('data')..'/site/pack/backpack/opt/'
 local manifest = vim.fn.stdpath('config')..'/packmanifest.lua'
+
+local function to_git_url(author, plugin)
+    if author == GITHUB_USERNAME then
+        return string.format('git@github.com:%s/%s.git', author, plugin)
+    else
+        return string.format('https://github.com:%s/%s.git', author, plugin)
+    end
+end
 
 local function parse_url(url)
     local username, plugin = string.match(url, '^https://github.com/([^/]+)/([^/]+)$')
@@ -156,7 +165,7 @@ local function parse_url(url)
     end
 
     local git_url
-    if username == 'your GitHub username' then
+    if username == GITHUB_USERNAME then
         git_url = string.format('git@github.com:%s/%s.git', username, plugin)
     else
         git_url = string.format('https://github.com/%s/%s.git', username, plugin)
@@ -206,6 +215,10 @@ function M.setup()
         })
         if vim.fn.isdirectory(opt..'/'..plugin) ~= 0 then
             vim.cmd('packadd! '..plugin)
+        else
+            git_clone(plugin, to_git_url(author, plugin), function()
+                vim.cmd('packadd! '..plugin)
+            end)
         end
     end
     if vim.fn.filereadable(manifest) ~= 0 then
@@ -230,6 +243,7 @@ function M.pack_add(url)
     })
     local on_success = function()
         vim.cmd('packadd '..plugin)
+        vim.cmd('helptags ALL')
     end
     if vim.fn.isdirectory(opt..plugin) ~= 0 then
         git_pull(plugin, on_success)
